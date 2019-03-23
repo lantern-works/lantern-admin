@@ -1,0 +1,47 @@
+<html>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <body>
+        <div id="admin-app">
+            <section class="section" v-for="type in types">
+                <div class="container">
+                    <h1>{{type.title}}</h1>
+                    <ul>
+                        <li v-for="item in type.items">
+                            <pre class="prettyprint">{{ item }}</pre>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js">
+    </script>
+    <script type="text/javascript">
+        const hostname = 'dev.lantern.link:9443'
+        const db = Gun()
+        const app = new Vue({
+          el: '#admin-app',
+          data: {
+            types: [
+                {title: 'Context', key: 'ctx', items: []},
+                {title: 'Package', key: 'pkg', items: []},
+                {title: 'Organization', key: 'org', items: []},
+            ]
+          }
+        })
+        
+        db.opt({peers: ['https://' + hostname + '/gun']})
+
+        app.$data.types.forEach(type => {
+            let node = db.get('__LX__').get(type.key)
+            node.map((v,k) => {
+                console.log(" - " + type.title, k,v)
+                type.items.push(v)
+            })
+
+        })
+
+    </script>
+</html>
